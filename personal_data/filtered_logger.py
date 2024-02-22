@@ -5,9 +5,12 @@
 
 
 import re
+from typing import List
 
-def filter_datum(fields, redaction, message, separator):
-    """
+def filter_datum(fields: List[str], redaction: str, message: str, separator: str) -> str:
+    """"
     function called filter_datum that returns the log message obfuscate
 	"""
-    return re.sub(r'(?<=^|[' + re.escape(separator) + r'])(' + '|'.join(fields) + r')=[^;]+', redaction, message)
+    pattern = '|'.join(fields)
+    return re.sub(r'(?<={}=)[^{}]+'.format(pattern, re.escape(separator)), redaction, message)
+
