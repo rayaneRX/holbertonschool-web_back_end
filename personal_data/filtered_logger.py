@@ -10,6 +10,7 @@ from typing import List
 import csv
 from datetime import datetime
 
+
 def filter_datum(fields: List[str], redaction: str, message: str,
                  separator: str) -> str:
     """
@@ -18,6 +19,7 @@ def filter_datum(fields: List[str], redaction: str, message: str,
     return re.sub(fr'({"|".join(fields)})=[^{separator}]+',
                   fr'\1={redaction}',
                   message)
+
 
 class RedactingFormatter(logging.Formatter):
     """ Redacting Formatter class """
@@ -35,6 +37,7 @@ class RedactingFormatter(logging.Formatter):
                                   self.SEPARATOR)
         return super(RedactingFormatter, self).format(record)
 
+
 def get_logger() -> logging.Logger:
     """Return a logging.Logger object."""
     logger = logging.getLogger("user_data")
@@ -46,6 +49,5 @@ def get_logger() -> logging.Logger:
     logger.propagate = False
     return logger
 
+
 PII_FIELDS = ("name", "email", "phone", "address", "credit_card")
-
-
