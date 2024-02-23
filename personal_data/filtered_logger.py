@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
- function called filter_datum that returns the log message obfuscate
-"""
-
-
 import logging
 import csv
 
