@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """
- function called filter_datum that returns the log message obfuscate
+Filtered logger module
 """
 
-
 import logging
-from logging import StreamHandler
-from typing import List
 import csv
-from datetime import datetime
+from typing import List
+from logging import Logger, StreamHandler
+
+# Define PII_FIELDS constant
+PII_FIELDS = ("name", "email", "phone", "address", "creditcard")
 
 
 def filter_datum(fields: List[str], redaction: str, message: str,
                  separator: str) -> str:
     """
-    Replace specified fields in the log message with the redaction string.
+    Obfuscate sensitive information from log message
     """
     return re.sub(fr'({"|".join(fields)})=[^{separator}]+',
                   fr'\1={redaction}',
@@ -22,32 +23,43 @@ def filter_datum(fields: List[str], redaction: str, message: str,
 
 
 class RedactingFormatter(logging.Formatter):
-    """ Redacting Formatter class """
+    """ Redacting Formatter class
+    """
     REDACTION = "***"
     FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
     SEPARATOR = ";"
 
     def __init__(self, fields: List[str]):
+        """
+        Args:
+        """
         super(RedactingFormatter, self).__init__(self.FORMAT)
         self.fields = fields
 
     def format(self, record: logging.LogRecord) -> str:
-        """ Format the log record. """
+        """ Format the log record.
+        """
         record.msg = filter_datum(self.fields, self.REDACTION, record.msg,
                                   self.SEPARATOR)
         return super(RedactingFormatter, self).format(record)
 
 
-def get_logger() -> logging.Logger:
-    """Return a logging.Logger object."""
-    logger = logging.getLogger("user_data")
+def get_logger() -> Logger:
+    """
+    Returns a configured logger object
+    """
+    logger = logging.getLogger('user_data')
     logger.setLevel(logging.INFO)
-    handler = StreamHandler()
     formatter = RedactingFormatter(PII_FIELDS)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-    logger.propagate = False
+    stream_handler = StreamHandler()
+    stream_handler.setFormatter(formatter)
+    logger.addHandler(stream_handler)
+    logger.propagate = False  # Do not propagate messages to other loggers
     return logger
 
 
-PII_FIELDS = ("name", "email", "phone", "address", "credit_card")
+if __name__ == "__main__":
+    logger = get_logger()
+    logger.info("This is a test message with sensitive information: "
+                "name=bob; email=bob@example.com; phone=123456789; "
+                "address=123 Street; creditcard=1234567890123456")
