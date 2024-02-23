@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""
-    Encrypt a string
-"""
-
+""" Module for implementing a hash_password function """
 
 import bcrypt
 
-def hash_password(password):
-    # Generate a salt
+
+def hash_password(password) -> bytes:
+    """ Module for implementing a hash_password function """
+    password_bytes = password.encode()
     salt = bcrypt.gensalt()
-    # Hash the password with the salt
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed_password = bcrypt.hashpw(password_bytes, salt)
     return hashed_password
