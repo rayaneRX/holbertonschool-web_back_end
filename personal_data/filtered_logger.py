@@ -48,3 +48,6 @@ def get_logger() -> logging.Logger:
     logger.addHandler(handler)
     logger.propagate = False
     return logger
+
+
+PII_FIELDS = ("name", "email", "phone", "address", "credit_card")
