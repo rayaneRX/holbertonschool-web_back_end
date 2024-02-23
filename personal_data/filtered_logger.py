@@ -4,17 +4,21 @@
 """
 
 
-import re
-from typing import List
+import logging
+from filtered_logger import filter_datum
 
 
-def filter_datum(fields: List[str], redaction: str, message: str,
-                 separator: str) -> str:
+class RedactingFormatter(logging.Formatter):
+    """ Redacting Formatter class """
 
-    """
-    function called filter_datum that returns the log message obfuscate
-    """
+    REDACTION = "***"
+    FORMAT = "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
+    SEPARATOR = ";"
 
-    pattern = '|'.join(fields)
-    return re.sub(r'({})=([^{}]+)'.format(pattern, re.escape(separator)),
-                  r'\1={}'.format(redaction), message)
+    def __init__(self, fields: list):
+        super(RedactingFormatter, self).__init__(self.FORMAT)
+        self.fields = fields
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = super().format(record)
+        return filter_datum(self.fields, self.REDACTION, message, self.SEPARATOR)
