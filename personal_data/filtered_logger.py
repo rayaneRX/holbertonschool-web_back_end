@@ -1,3 +1,9 @@
+#!/usr/bin/env python3
+"""
+ function called filter_datum that returns the log message obfuscate
+"""
+
+
 import re
 from typing import List
 import logging
@@ -5,12 +11,6 @@ def filter_datum(fields: List[str], redaction: str, message: str,
                  separator: str) -> str:
     """
     Replace specified fields in the log message with the redaction string.
-    fields: List of strings representing fields to redact.
-    redaction: String to use for redacting the fields.
-    message: Log message containing the fields to be redacted.
-    separator: String representing the separator between fields in the message.
-    Returns:
-        The log message with specified fields redacted.
     """
     return re.sub(fr'({"|".join(fields)})=[^{separator}]+',
                   fr'\1={redaction}',
@@ -31,10 +31,6 @@ class RedactingFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """ Format the log record.
-        Args:
-            record (logging.LogRecord): Log record to be formatted.
-        Returns:
-            str: Formatted log message.
         """
         record.msg = filter_datum(self.fields, self.REDACTION, record.msg,
                                   self.SEPARATOR)
