@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Filtered logger module
+Main file
 """
 
 import os
@@ -8,22 +8,20 @@ import mysql.connector
 
 
 def get_db():
-    """Return a connection to the MySQL database."""
-    # Get database credentials from environment variables
-    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
-    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
-    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
-    database = os.getenv("PERSONAL_DATA_DB_NAME", "")
+    """Returns a connector to the MySQL database."""
+    # Retrieve database credentials from environment variables
+    username = os.getenv('PERSONAL_DATA_DB_USERNAME', 'root')
+    password = os.getenv('PERSONAL_DATA_DB_PASSWORD', '')
+    host = os.getenv('PERSONAL_DATA_DB_HOST', 'localhost')
+    db_name = os.getenv('PERSONAL_DATA_DB_NAME')
 
     # Connect to the database
-    connection = mysql.connector.connect(
+    return mysql.connector.connect(
+        host=host,
         user=username,
         password=password,
-        host=host,
-        database=database
+        database=db_name
     )
-
-    return connection
 
 
 if __name__ == "__main__":
