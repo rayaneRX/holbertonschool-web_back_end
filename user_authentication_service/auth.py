@@ -1,15 +1,8 @@
 #!/usr/bin/env python3
 """ Hash password """
 
-import bcrypt
-from db import DB
 from user import User
-
-
-def _hash_password(password: str) -> bytes:
-    salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-    return hashed_password
+import bcrypt
 
 
 class Auth:
@@ -36,3 +29,14 @@ class Auth:
         self._db.save_user(user)
 
         return user
+
+    def valid_login(self, email: str, password: str) -> bool:
+        # Retrieve user by email
+        user = self._db.get_user_by_email(email)
+
+        if user:
+            # Check if passwords match
+            if bcrypt.checkpw(password.encode('utf-8'), user.hashed_password):
+                return True
+
+        return False
