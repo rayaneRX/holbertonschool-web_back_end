@@ -9,7 +9,6 @@ from sqlalchemy.orm.session import Session
 
 Base = declarative_base()
 
-
 class User(Base):
     """User class"""
     __tablename__ = 'users'
@@ -17,7 +16,6 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True)
     hashed_password = Column(String)
-
 
 class DB:
     """DB class"""
@@ -58,7 +56,6 @@ class DB:
         for key, value in kwargs.items():
             setattr(user, key, value)
         self._session.commit()
-
 
 if __name__ == "__main__":
     my_db = DB()
