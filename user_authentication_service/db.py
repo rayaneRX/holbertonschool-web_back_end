@@ -30,11 +30,38 @@ class DB:
         return self.__session
 
     def add_user(self, email: str, hashed_password: str) -> User:
+        """Add a new user to the database
+        
+        Args:
+            email: Email of the user.
+            hashed_password: Hashed password of the user.
+            
+        Returns:
+            User object that was added.
+        """
         user = User(email=email, hashed_password=hashed_password)
         self._session.add(user)
-        try:
-            self._session.commit()
-        except IntegrityError:
-            self._session.rollback()
-            raise ValueError("User with this email already exists")
+        self._session.commit()
         return user
+
+    def find_user_by(self, **kwargs) -> User:
+        """Find a user by the specified criteria
+        
+        Args:
+            **kwargs: Arbitrary keyword arguments for filtering the user
+            
+        Returns:
+            User object that matches the specified criteria
+            
+        Raises:
+            NoResultFound: If no user is found with the specified criteria
+            InvalidRequestError: If an invalid query argument is passed
+        """
+        try:
+            user = self._session.query(User).filter_by(**kwargs).first()
+            if user is None:
+                raise NoResultFound
+            return user
+        except InvalidRequestError:
+            self._session.rollback()
+            raise InvalidRequestError("Invalid query argument")
