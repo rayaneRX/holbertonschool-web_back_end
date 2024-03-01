@@ -1,5 +1,11 @@
-from sqlalchemy.exc import IntegrityError
-from user import User
+#!/usr/bin/env python3
+""" DB module """
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
+from user import Base, User
+
 
 class DB:
     """DB class
@@ -24,11 +30,11 @@ class DB:
 
     def add_user(self, email: str, hashed_password: str) -> User:
         """Add a new user to the database
-        
+
         Args:
             email: Email of the user.
             hashed_password: Hashed password of the user.
-            
+
         Returns:
             User object that was added.
         """
