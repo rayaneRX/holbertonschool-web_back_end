@@ -4,8 +4,10 @@ This module contains the User class which is a model
 for the users table in the database.
 """
 
+
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
+
 
 Base = declarative_base()
 
