@@ -9,7 +9,7 @@ app = Flask(__name__)
 AUTH = Auth()
 
 
-@app.route("/users", methods=["POST"])
+@app.route('/users', methods=['POST'], strict_slashes=False)
 def register_user():
     email = request.form.get("email")
     password = request.form.get("password")
