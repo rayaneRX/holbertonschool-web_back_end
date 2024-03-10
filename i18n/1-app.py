@@ -20,6 +20,7 @@ app.config.from_object(Config)
 
 @app.route('/')
 def index():
+    """ Basic Flask app """
     return render_template('0-index.html')
 
 

@@ -20,11 +20,13 @@ app.config.from_object(Config)
 
 @babel.localeselector
 def get_locale():
+    """ Basic Flask app """
     return request.accept_languages.best_match(app.config['LANGUAGES'])
 
 
 @app.route('/')
 def index():
+    """ Basic Flask app """
     return render_template('2-index.html')
 
 
