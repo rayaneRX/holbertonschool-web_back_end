@@ -2,7 +2,6 @@
 """Writing strings to Redis
 """
 
-
 import redis
 import uuid
 from typing import Union, Callable, Optional
@@ -10,17 +9,24 @@ from functools import wraps
 
 
 class Cache:
+    """A class for storing and retrieving data in Redis."""
+
     def __init__(self):
+        """Initialize a connection to Redis."""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
     def store(self, data: Union[str, bytes, int, float]) -> str:
+        """Store data in Redis.
+        """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
 
     def get(self, key: str, fn: Optional[Callable] =
             None) -> Union[str, bytes, int, float, None]:
+        """Retrieve data from Redis.
+        """
         value = self._redis.get(key)
         if value is None:
             return None
@@ -29,13 +35,18 @@ class Cache:
         return value
 
     def get_str(self, key: str) -> Union[str, None]:
+        """Retrieve string data from Redis.
+        """
         return self.get(key, fn=lambda x: x.decode("utf-8"))
 
     def get_int(self, key: str) -> Union[int, None]:
+        """Retrieve integer data from Redis.
+        """
         return self.get(key, fn=lambda x: int(x))
 
 
 def call_history(method: Callable) -> Callable:
+    """Decorator to track history of method calls."""
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         input_list_key = method.__qualname__ + ":inputs"
@@ -53,6 +64,7 @@ def call_history(method: Callable) -> Callable:
 
 
 def replay(method: Callable):
+    """Replay history of method calls."""
     method_name = method.__qualname__
     input_list_key = method_name + ":inputs"
     output_list_key = method_name + ":outputs"
