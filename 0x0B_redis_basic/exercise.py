@@ -10,7 +10,6 @@ from functools import wraps
 
 
 class Cache:
-    """ cache class """
     def __init__(self):
         self._redis = redis.Redis()
         self._redis.flushdb()
@@ -36,13 +35,21 @@ class Cache:
         return self.get(key, fn=lambda x: int(x))
 
 
-def count_calls(method: Callable) -> Callable:
+def call_history(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        key = method.__qualname__
-        self._redis.incr(key)
-        return method(self, *args, **kwargs)
+        input_list_key = method.__qualname__ + ":inputs"
+        output_list_key = method.__qualname__ + ":outputs"
+
+        input_data = str(args)
+        self._redis.rpush(input_list_key, input_data)
+
+        output = method(self, *args, **kwargs)
+
+        self._redis.rpush(output_list_key, str(output))
+
+        return output
     return wrapper
 
 
-Cache.store = count_calls(Cache.store)
+Cache.store = call_history(Cache.store)
