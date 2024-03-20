@@ -40,3 +40,4 @@ def count_calls(method: Callable) -> Callable:
         return method(self, *args, **kwargs)
     return wrapper
 
+Cache.store = count_calls(Cache.store)
