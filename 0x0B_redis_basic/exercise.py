@@ -52,4 +52,19 @@ def call_history(method: Callable) -> Callable:
     return wrapper
 
 
+def replay(method: Callable):
+    method_name = method.__qualname__
+    input_list_key = method_name + ":inputs"
+    output_list_key = method_name + ":outputs"
+
+    # Retrieve input and output lists from Redis
+    input_list = cache._redis.lrange(input_list_key, 0, -1)
+    output_list = cache._redis.lrange(output_list_key, 0, -1)
+
+    print(f"{method_name} was called {len(input_list)} times:")
+    for inputs, output in zip(input_list, output_list):
+        print(f"{method_name}(*{inputs.decode('utf-8')}) ->
+              {output.decode('utf-8')}")
+
+
 Cache.store = call_history(Cache.store)
