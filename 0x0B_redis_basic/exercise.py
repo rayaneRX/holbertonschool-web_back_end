@@ -8,6 +8,7 @@ import uuid
 from typing import Union, Callable, Optional
 from functools import wraps
 
+
 class Cache:
     def __init__(self):
         self._redis = redis.Redis()
@@ -18,7 +19,8 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:
+    def get(self, key: str, fn: Optional[Callable] =
+            None) -> Union[str, bytes, int, float, None]:
         value = self._redis.get(key)
         if value is None:
             return None
@@ -32,6 +34,7 @@ class Cache:
     def get_int(self, key: str) -> Union[int, None]:
         return self.get(key, fn=lambda x: int(x))
 
+
 def count_calls(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
@@ -39,5 +42,6 @@ def count_calls(method: Callable) -> Callable:
         self._redis.incr(key)
         return method(self, *args, **kwargs)
     return wrapper
+
 
 Cache.store = count_calls(Cache.store)
