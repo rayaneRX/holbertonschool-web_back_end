@@ -2,6 +2,7 @@
 """Writing strings to Redis
 """
 
+
 import redis
 import uuid
 from typing import Union, Callable, Optional
@@ -18,6 +19,12 @@ class Cache:
 
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """Store data in Redis.
+
+        Args:
+            data (Union[str, bytes, int, float]): Data to be stored.
+
+        Returns:
+            str: The generated key under which the data is stored.
         """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
@@ -26,6 +33,13 @@ class Cache:
     def get(self, key: str, fn: Optional[Callable] =
             None) -> Union[str, bytes, int, float, None]:
         """Retrieve data from Redis.
+
+        Args:
+            key (str): The key under which the data is stored in Redis.
+            fn (Optional[Callable]): A function to apply to the retrieved data.
+
+        Returns:
+            Union[str, bytes, int, float, None]: The retrieved data.
         """
         value = self._redis.get(key)
         if value is None:
@@ -36,11 +50,23 @@ class Cache:
 
     def get_str(self, key: str) -> Union[str, None]:
         """Retrieve string data from Redis.
+
+        Args:
+            key (str): The key under which the string data is stored in Redis.
+
+        Returns:
+            Union[str, None]: The retrieved string data.
         """
         return self.get(key, fn=lambda x: x.decode("utf-8"))
 
     def get_int(self, key: str) -> Union[int, None]:
         """Retrieve integer data from Redis.
+
+        Args:
+            key (str): The key under which the integer data is stored in Redis.
+
+        Returns:
+            Union[int, None]: The retrieved integer data.
         """
         return self.get(key, fn=lambda x: int(x))
 
@@ -75,8 +101,8 @@ def replay(method: Callable):
 
     print(f"{method_name} was called {len(input_list)} times:")
     for inputs, output in zip(input_list, output_list):
-        print(f"{method_name}(*{inputs.decode('utf-8')}) ->
-              {output.decode('utf-8')}")
+        print(f"{method_name}(*{inputs.decode
+                                ('utf-8')}) -> {output.decode('utf-8')}")
 
 
 Cache.store = call_history(Cache.store)
