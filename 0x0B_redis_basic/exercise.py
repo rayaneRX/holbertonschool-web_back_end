@@ -5,104 +5,73 @@
 
 import redis
 import uuid
-from typing import Union, Callable, Optional
+from typing import Union, Callable
 from functools import wraps
 
 
 class Cache:
-    """A class for storing and retrieving data in Redis."""
-
     def __init__(self):
-        """Initialize a connection to Redis."""
         self._redis = redis.Redis()
         self._redis.flushdb()
 
     def store(self, data: Union[str, bytes, int, float]) -> str:
-        """Store data in Redis.
-
-        Args:
-            data (Union[str, bytes, int, float]): Data to be stored.
-
-        Returns:
-            str: The generated key under which the data is stored.
-        """
         key = str(uuid.uuid4())
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Optional[Callable] =
-            None) -> Union[str, bytes, int, float, None]:
-        """Retrieve data from Redis.
-
-        Args:
-            key (str): The key under which the data is stored in Redis.
-            fn (Optional[Callable]): A function to apply to the retrieved data.
-
-        Returns:
-            Union[str, bytes, int, float, None]: The retrieved data.
-        """
+    def get(self, key: str, fn: Callable =
+            None) -> Union[str, bytes, int, float]:
         value = self._redis.get(key)
         if value is None:
             return None
-        if fn is not None:
+        if fn:
             return fn(value)
         return value
 
-    def get_str(self, key: str) -> Union[str, None]:
-        """Retrieve string data from Redis.
-
-        Args:
-            key (str): The key under which the string data is stored in Redis.
-
-        Returns:
-            Union[str, None]: The retrieved string data.
-        """
+    def get_str(self, key: str) -> str:
         return self.get(key, fn=lambda x: x.decode("utf-8"))
 
-    def get_int(self, key: str) -> Union[int, None]:
-        """Retrieve integer data from Redis.
-
-        Args:
-            key (str): The key under which the integer data is stored in Redis.
-
-        Returns:
-            Union[int, None]: The retrieved integer data.
-        """
+    def get_int(self, key: str) -> int:
         return self.get(key, fn=lambda x: int(x))
 
+    @staticmethod
+    def count_calls(method):
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            key = method.__qualname__
+            self._redis.incr(key)
+            return method(self, *args, **kwargs)
+        return wrapper
 
-def call_history(method: Callable) -> Callable:
-    """Decorator to track history of method calls."""
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        input_list_key = method.__qualname__ + ":inputs"
-        output_list_key = method.__qualname__ + ":outputs"
+    @count_calls
+    def store(self, data: Union[str, bytes, int, float]) -> str:
+        key = str(uuid.uuid4())
+        self._redis.set(key, data)
+        return key
 
-        input_data = str(args)
-        self._redis.rpush(input_list_key, input_data)
+    @staticmethod
+    def call_history(method):
+        @wraps(method)
+        def wrapper(self, *args, **kwargs):
+            key_inputs = f"{method.__qualname__}:inputs"
+            key_outputs = f"{method.__qualname__}:outputs"
+            self._redis.rpush(key_inputs, str(args))
+            result = method(self, *args, **kwargs)
+            self._redis.rpush(key_outputs, str(result))
+            return result
+        return wrapper
 
-        output = method(self, *args, **kwargs)
-
-        self._redis.rpush(output_list_key, str(output))
-
-        return output
-    return wrapper
-
-
-def replay(method: Callable):
-    """Replay history of method calls."""
-    method_name = method.__qualname__
-    input_list_key = method_name + ":inputs"
-    output_list_key = method_name + ":outputs"
-
-    # Retrieve input and output lists from Redis
-    input_list = cache._redis.lrange(input_list_key, 0, -1)
-    output_list = cache._redis.lrange(output_list_key, 0, -1)
-
-    print(f"{method_name} was called {len(input_list)} times:")
-    for inputs, output in zip(input_list, output_list):
-        print(f"{method_name}(*{inputs.decode
-                                ('utf-8')}) -> {output.decode('utf-8')}")
+    @call_history
+    def store(self, data: Union[str, bytes, int, float]) -> str:
+        key = str(uuid.uuid4())
+        self._redis.set(key, data)
+        return key
 
 
-Cache.store = call_history(Cache.store)
+def replay(func):
+    inputs = cache._redis.lrange(f"{func.__qualname__}:inputs", 0, -1)
+    outputs = cache._redis.lrange(f"{func.__qualname__}:outputs", 0, -1)
+    print(f"{func.__qualname__} was called {len(inputs)} times:")
+    for inp, out in zip(inputs, outputs):
+        print(f"{func.__qualname__}(*{inp.decode
+                                      ('utf-8')}) -> {out.decode('utf-8')}")
