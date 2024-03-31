@@ -1,17 +1,15 @@
-// 6-payment_token.test.js
-const assert = require('assert');
+const expect = require('chai').expect;
 const getPaymentTokenFromAPI = require('./6-payment_token');
 
-describe('getPaymentTokenFromAPI', function() {
-  it('should return a resolved promise with successful response from the API', function(done) {
+describe('getPaymentTokenFromAPI', () => {
+  it('Returns a resolved promise with the correct data when success is true', (done) => {
     getPaymentTokenFromAPI(true)
-      .then(response => {
-        assert.deepStrictEqual(response, { data: 'Successful response from the API' });
+      .then((response) => {
+        expect(response).to.deep.equal({ data: 'Successful response from the API' });
         done();
       })
-      .catch(err => {
-        done(err);
+      .catch((error) => {
+        done(error);
       });
   });
 });
-git 
