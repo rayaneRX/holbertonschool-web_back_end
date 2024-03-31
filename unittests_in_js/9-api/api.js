@@ -1,15 +1,17 @@
-// api.js
 const express = require('express');
 const app = express();
 
-// Endpoint for cart with ID validation
-app.get('/cart/:id(\\d+)', (req, res) => {
-  const id = req.params.id;
-  res.send(`Payment methods for cart ${id}`);
+app.get("/", (req, res) => {
+  res.send('Welcome to the payment system');
 });
 
-app.listen(7865, () => {
-  console.log('API available on localhost port 7865');
+app.get('/cart/:id(\\d+)', (req, res) => {
+  res.send(`Payment methods for cart ${req.params.id}`);
+});
+
+const PORT = 7865;
+app.listen(PORT, () => {
+  console.log(`API available on localhost port ${PORT}`);
 });
 
 module.exports = app;
